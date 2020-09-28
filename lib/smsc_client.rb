@@ -10,26 +10,24 @@ module SmscClient
 
     def send(phone, text)
       @logger.info "#{phone}: #{text}" #
-      unless false #  !Rails.env.development? && Rails.application.secrets.smsc.nil?
-        Timeout.timeout(10) do
-          if ::Rails.env.development? # || Rails.env.staging?)
-            puts "Отправляю sms с текстом #{text} на номер #{phone}"
-            return
-          end
-          params = {
-            login: @login,
-            psw: @password,
-            phones: phone,
-            mes: text,
-            charset: @charset
-          }
-          unless @sender.blank?
-            params[:sender] = @sender
-          end
-          RestClient.post(
-            'http://smsc.ru/sys/send.php', params
-          )
+      Timeout.timeout(10) do
+        if ::Rails.env.development? # || Rails.env.staging?)
+          puts "Отправляю sms с текстом #{text} на номер #{phone}"
+          return
         end
+        params = {
+          login: @login,
+          psw: @password,
+          phones: phone,
+          mes: text,
+          charset: @charset
+        }
+        unless @sender.blank?
+          params[:sender] = @sender
+        end
+        RestClient.post(
+          'http://smsc.ru/sys/send.php', params
+        )
       end
     rescue StandardError => e
       puts "Не удалось отправить sms: #{e.class.name}: #{e.message}" # РАЗОБРАТЬ
